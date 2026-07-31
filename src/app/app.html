@@ -1,0 +1,1300 @@
+<div class="min-h-screen bg-white text-slate-900 p-0">
+  <!-- Official Unidos Light Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm px-6 py-3 flex items-center justify-between gap-6 text-sm font-medium text-slate-700">
+    
+    <!-- 1. Logo Ufficiale (Left) -->
+    <div class="flex items-center gap-3 cursor-pointer select-none" (click)="setView('welcome')">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-black tracking-tight text-blue-900 flex items-center gap-1">
+          UNIDOS
+        </span>
+        <div class="border-l border-slate-300 pl-2.5 flex flex-col justify-center leading-none">
+          <span class="text-[11px] font-bold tracking-widest text-slate-600 uppercase">Informatica</span>
+          <span class="text-[9px] font-medium tracking-wider text-slate-400 uppercase">e consulenza</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Menu di Navigazione (Center/Right Order: Shop, Soluzioni, Contatto, Blog) -->
+    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
+      <button type="button" (click)="openShopModal()" class="text-slate-800 hover:text-blue-600 transition-colors duration-150 py-1 border-b-2 border-transparent hover:border-blue-600 cursor-pointer">
+        {{ t()['shop'] }}
+      </button>
+
+      <!-- Soluzioni Dropdown -->
+      <div class="relative group">
+        <button type="button" class="flex items-center gap-1 text-slate-700 hover:text-blue-600 transition-colors duration-150 py-1 cursor-pointer">
+          <span>{{ t()['soluzioni'] }}</span>
+          <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-transform duration-150 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <div class="hidden group-hover:block absolute left-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-100 p-3 z-50">
+          <button type="button" (click)="openSolutionModal('consulenza')" class="w-full text-left block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-blue-600 transition font-medium cursor-pointer">{{ t()['subConsulenza'] }}</button>
+          <button type="button" (click)="openSolutionModal('monitoraggio')" class="w-full text-left block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-blue-600 transition font-medium cursor-pointer">{{ t()['subMonitoraggio'] }}</button>
+          <button type="button" (click)="openSolutionModal('sicurezza')" class="w-full text-left block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-blue-600 transition font-medium cursor-pointer">{{ t()['subSicurezza'] }}</button>
+          <button type="button" (click)="openSolutionModal('sviluppo')" class="w-full text-left block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-blue-600 transition font-medium cursor-pointer">{{ t()['subSviluppo'] }}</button>
+        </div>
+      </div>
+
+      <button type="button" (click)="openContactModal()" class="text-slate-700 hover:text-blue-600 transition-colors duration-150 py-1 border-b-2 border-transparent hover:border-blue-600 cursor-pointer">
+        {{ t()['contatto'] }}
+      </button>
+
+      <button type="button" (click)="openBlogModal()" class="text-slate-700 hover:text-blue-600 transition-colors duration-150 py-1 border-b-2 border-transparent hover:border-blue-600 cursor-pointer">
+        {{ t()['blog'] }}
+      </button>
+    </nav>
+
+    <!-- 3. Pulsante LOGIN / Account User Badge & Selettore Lingua (Right) -->
+    <div class="flex items-center gap-4">
+      
+      <!-- When NOT logged in -->
+      <button *ngIf="!isLoggedIn()" type="button" (click)="setView('login')" class="group relative inline-flex items-center justify-center p-[2px] overflow-hidden text-xs font-bold rounded-full bg-gradient-to-r from-sky-400 via-blue-600 to-indigo-600 hover:from-sky-300 hover:via-indigo-500 hover:to-purple-600 shadow-md hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 active:scale-95 cursor-pointer z-50">
+        <span class="px-5 py-1.5 transition-all ease-in duration-200 bg-white group-hover:bg-blue-600 group-hover:text-white text-blue-950 rounded-full font-black uppercase tracking-wider flex items-center gap-1.5">
+          <span>LOGIN</span>
+          <span class="text-xs transition-transform duration-200 group-hover:translate-x-1">➔</span>
+        </span>
+      </button>
+
+
+
+      <!-- When Logged In: Social Profile / Dashboard Role Switcher & Logout -->
+      <div *ngIf="isLoggedIn()" class="flex items-center gap-2">
+        <button (click)="toggleDevSessionsModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 hover:border-sky-500 text-xs font-semibold text-slate-100 shadow-sm transition group cursor-pointer">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span>{{ socialUser()?.avatar }}</span>
+          <span class="font-bold hidden sm:inline text-white">{{ socialUser()?.name }}</span>
+          <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <span>{{ onlineDevCount() }}</span> Dev Live
+          </span>
+        </button>
+
+
+        <button (click)="setView(userRole() === 'developer' ? 'developer' : 'client')" class="px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-blue-100 transition">
+          <span>{{ userRole() === 'developer' ? '👨‍💻 Console Dev' : '🏢 Portale Cliente' }}</span>
+        </button>
+
+        <button (click)="logout()" title="Logout" class="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 text-xs font-semibold transition">
+          Esci
+        </button>
+      </div>
+
+
+
+
+      <!-- Global Language Selector Dropdown -->
+      <div class="relative border-l border-slate-200 pl-3">
+        <button 
+          (click)="toggleDropdown('language')" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs text-slate-700 font-semibold transition-all shadow-sm">
+          <span>🌐</span>
+          <span>{{ selectedLanguage().flag }}</span>
+          <span class="font-bold hidden md:inline">{{ selectedLanguage().name }}</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div *ngIf="activeDropdown() === 'language'" class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-200 p-2 z-50 animate-in fade-in duration-150 max-h-72 overflow-y-auto">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1 mb-1 border-b border-slate-100">
+            Seleziona Lingua Globale
+          </div>
+          <div class="space-y-0.5">
+            <button 
+              *ngFor="let lang of availableLanguages()" 
+              (click)="selectLanguage(lang)" 
+              [class.bg-blue-50]="selectedLanguage().code === lang.code"
+              [class.text-blue-600]="selectedLanguage().code === lang.code"
+              class="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 text-xs text-slate-700 text-left transition font-medium">
+              <span class="text-sm">{{ lang.flag }}</span>
+              <span>{{ lang.name }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+
+
+  <!-- ========================================== -->
+  <!-- 1. SCHERMATA DI BENVENUTO (WELCOME VIEW) -->
+  <!-- ========================================== -->
+  <div *ngIf="activeView() === 'welcome'" class="w-full min-h-[calc(100vh-64px)] bg-white unidos-hero-full-bg animate-in fade-in duration-300 relative">
+    <!-- Overlay Content Container -->
+    <div class="w-full h-full flex flex-col justify-center items-center text-center p-8 md:p-16 space-y-6">
+      <h1 class="text-4xl md:text-6xl font-black text-blue-950 tracking-tight drop-shadow-sm max-w-4xl">
+        Unidos S.r.l.
+      </h1>
+      <p (click)="setView('login')" class="text-white text-base md:text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/30 px-8 py-3.5 rounded-full border border-blue-400/20 transition-all cursor-pointer shadow-lg hover:scale-105 active:scale-95">
+        {{ t()['heroSubtitle'] }}
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1.5 SCHERMATA DI LOGIN DEDICATA (LOGIN PAGE VIEW) -->
+  <!-- ========================================== -->
+  <div *ngIf="activeView() === 'login'" class="w-full min-h-[calc(100vh-64px)] unidos-hero-full-bg text-slate-100 flex flex-col justify-center items-center py-12 px-4 animate-in fade-in duration-300 relative">
+    <!-- Dark overlay over Unidos background for contrast -->
+    <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm pointer-events-none"></div>
+
+    <!-- Back to Home button -->
+    <div class="w-full max-w-lg mb-6 flex justify-start relative z-10">
+      <button (click)="setView('welcome')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-200 hover:text-white bg-slate-900/90 border border-slate-700/80 hover:border-slate-500 px-4 py-2 rounded-xl transition cursor-pointer shadow-lg">
+        <span>←</span>
+        <span>Torna alla Home</span>
+      </button>
+    </div>
+
+    <!-- Main Dedicated Login Card -->
+    <div class="w-full max-w-lg bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-xl">
+      <!-- Decorative Accent Glow -->
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header -->
+      <div class="text-center space-y-2 relative z-10">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl mx-auto shadow-xl shadow-blue-500/20">
+          U
+        </div>
+        <h1 class="text-2xl font-black text-white tracking-tight">Portale Acceso & Autenticazione</h1>
+        <p class="text-xs text-slate-400">Accedi all'area riservata clienti e sviluppatori Unidos S.r.l.</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="loginErrorMessage()" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold animate-in fade-in">
+        {{ loginErrorMessage() }}
+      </div>
+
+      <!-- Login Form -->
+      <form (ngSubmit)="loginWithCredentials()" class="space-y-4 relative z-10">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Aziendale o Personale</label>
+          <input 
+            type="email" 
+            [(ngModel)]="loginEmail" 
+            name="loginEmail"
+            placeholder="nome@unidos.it" 
+            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" 
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Password Accesso</label>
+          <input 
+            type="password" 
+            [(ngModel)]="loginPassword" 
+            name="loginPassword"
+            placeholder="••••••••" 
+            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" 
+          />
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition active:scale-98 cursor-pointer uppercase tracking-wider">
+          Accedi Ora ➔
+        </button>
+
+        <div class="pt-1 text-center">
+          <button type="button" (click)="openRegisterModal()" class="text-xs text-sky-400 hover:text-sky-300 font-semibold underline underline-offset-4 transition cursor-pointer">
+            Non hai ancora un account? Registrati gratuitamente
+          </button>
+        </div>
+      </form>
+
+      <!-- Social Login Providers -->
+      <div class="pt-4 border-t border-slate-800/80 space-y-3 relative z-10">
+        <div class="text-center">
+          <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Oppure accedi con Single Sign-On</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Google -->
+          <button type="button" (click)="loginWithSocial('google')" class="p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 flex items-center justify-center gap-2 text-xs font-bold text-white transition hover:bg-slate-900 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+              <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15c0 2.7.7 5.3 1.9 7.7l3.7-2.9c-.2-.7-.4-1.4-.4-2.3z"/>
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
+            </svg>
+            <span>Google</span>
+          </button>
+
+          <!-- GitHub -->
+          <button type="button" (click)="loginWithSocial('github')" class="p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 flex items-center justify-center gap-2 text-xs font-bold text-white transition hover:bg-slate-900 cursor-pointer">
+            <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            <span>GitHub</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+  <!-- ========================================================== -->
+  <!-- 2. VISTA SVILUPPATORI / DEVOPS (TECHNICAL OPERATOR VIEW) -->
+  <!-- ========================================================== -->
+  <div *ngIf="activeView() === 'developer'" class="space-y-8 animate-in fade-in duration-200">
+    
+    <!-- Top Action Banner -->
+    <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-l-sky-500">
+      <div>
+        <h2 class="text-base font-extrabold text-slate-100 flex items-center gap-2">
+          <span>👨‍💻 Console di Gestione Tecnica (Team Sviluppatori)</span>
+        </h2>
+        <p class="text-xs text-slate-400">Piattaforma di controllo per l'infrastruttura di {{ companyProfile().companyName }}</p>
+      </div>
+
+      <button (click)="openModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 flex items-center gap-2 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        + Aggiungi Nuovo Monitor
+      </button>
+    </div>
+
+    <!-- KPI Metrics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div class="glass-panel p-4 flex flex-col justify-between">
+        <span class="text-xs font-bold text-sky-200">Totale Monitor</span>
+        <div class="text-3xl font-black text-white mt-2">{{ stats().total }}</div>
+      </div>
+
+      <div class="glass-panel p-4 flex flex-col justify-between border-l-4 border-l-emerald-500">
+        <span class="text-xs font-bold text-emerald-300">Servizi UP</span>
+        <div class="text-3xl font-black text-emerald-400 mt-2">{{ stats().up }}</div>
+      </div>
+
+      <div class="glass-panel p-4 flex flex-col justify-between border-l-4 border-l-rose-500">
+        <span class="text-xs font-bold text-rose-300">Servizi DOWN</span>
+        <div class="text-3xl font-black text-rose-400 mt-2">{{ stats().down }}</div>
+      </div>
+
+      <div class="glass-panel p-4 flex flex-col justify-between border-l-4 border-l-amber-500">
+        <span class="text-xs font-bold text-amber-300">Degradati</span>
+        <div class="text-3xl font-black text-amber-400 mt-2">{{ stats().degraded }}</div>
+      </div>
+
+      <div class="glass-panel p-4 flex flex-col justify-between border-l-4 border-l-sky-500">
+        <span class="text-xs font-bold text-sky-300">Uptime Medio</span>
+        <div class="text-3xl font-black text-sky-300 mt-2">{{ stats().uptimePercentage }}%</div>
+        <div class="w-full bg-slate-950 rounded-full h-1.5 mt-3 overflow-hidden border border-slate-800">
+          <div class="bg-sky-400 h-1.5 rounded-full" [style.width.%]="stats().uptimePercentage"></div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-4 flex flex-col justify-between border-l-4 border-l-purple-500">
+        <span class="text-xs font-bold text-purple-300">Latenza Media</span>
+        <div class="text-3xl font-black text-purple-300 mt-2">{{ stats().avgResponseTime }} <span class="text-sm font-normal text-sky-200">ms</span></div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid (Developer Mode: Monitors & Incident Stream) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Left Column: Monitors & Toolbar -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Toolbar Filter & Search -->
+        <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="relative w-full sm:w-72">
+            <input 
+              type="text" 
+              [(ngModel)]="searchTerm" 
+              (ngModelChange)="applyFilters()"
+              placeholder="Cerca monitor o URL..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500 transition">
+              <option value="ALL">Tutti gli stati</option>
+              <option value="UP">Solo UP</option>
+              <option value="DOWN">Solo DOWN</option>
+              <option value="DEGRADED">Solo DEGRADED</option>
+              <option value="PAUSED">Solo In Pausa</option>
+            </select>
+
+            <select [(ngModel)]="typeFilter" (ngModelChange)="applyFilters()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500 transition">
+              <option value="ALL">Tutte le tipologie</option>
+              <option value="http">HTTP</option>
+              <option value="https">HTTPS</option>
+              <option value="tcp">TCP</option>
+              <option value="ping">PING</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Monitor Cards List -->
+        <div class="space-y-3">
+          <div *ngIf="filteredMonitors().length === 0" class="glass-panel p-12 text-center text-slate-400">
+            <p class="text-sm">Nessun monitor trovato. Clicca su "+ Aggiungi Nuovo Monitor" per iniziare!</p>
+          </div>
+
+          <div *ngFor="let monitor of filteredMonitors()" class="glass-panel p-5 hover:border-slate-700 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div [ngClass]="{
+                'badge-up': monitor.status === 'UP',
+                'badge-down': monitor.status === 'DOWN',
+                'badge-degraded': monitor.status === 'DEGRADED',
+                'badge-paused': monitor.status === 'PAUSED',
+                'bg-slate-800 text-slate-400': monitor.status === 'PENDING'
+              }" class="px-3 py-1.5 rounded-lg text-xs font-black tracking-wide uppercase flex items-center gap-2">
+                <span [ngClass]="{
+                  'bg-emerald-400': monitor.status === 'UP',
+                  'bg-rose-400': monitor.status === 'DOWN',
+                  'bg-amber-400': monitor.status === 'DEGRADED',
+                  'bg-slate-400': monitor.status === 'PAUSED' || monitor.status === 'PENDING'
+                }" class="w-2 h-2 rounded-full"></span>
+                {{ monitor.status }}
+              </div>
+
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-slate-100 text-sm">{{ monitor.name }}</h3>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 font-mono uppercase">{{ monitor.type }}</span>
+                </div>
+                <p class="text-xs text-slate-400 font-mono mt-0.5 break-all">
+                  {{ monitor.url || (monitor.hostname + ':' + monitor.port) }}
+                </p>
+                <div class="flex items-center gap-4 text-[11px] text-slate-500 mt-2">
+                  <span>Intervallo: {{ monitor.interval }} min</span>
+                  <span *ngIf="monitor.lastResponseTime !== undefined && monitor.lastResponseTime !== null">Latenza: <strong class="text-slate-300 font-semibold">{{ monitor.lastResponseTime }} ms</strong></span>
+                  <span *ngIf="monitor.lastCheckAt">Ultimo controllo: {{ monitor.lastCheckAt | date:'HH:mm:ss dd/MM' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+              <button (click)="triggerCheck(monitor.id)" [disabled]="isChecking()[monitor.id]" class="px-3 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 text-xs font-medium transition flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" [class.animate-spin]="isChecking()[monitor.id]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                </svg>
+                Verifica
+              </button>
+
+              <button (click)="openDetail(monitor)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                Dettagli
+              </button>
+
+              <button (click)="togglePause(monitor)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                {{ monitor.status === 'PAUSED' ? 'Riprendi' : 'Pausa' }}
+              </button>
+
+              <button (click)="openModal(monitor)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs transition">
+                ✏️
+              </button>
+
+              <button (click)="deleteMonitor(monitor.id)" class="px-2.5 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-900/50 text-rose-400 text-xs transition">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Tabella Errori & Log Incidenti Stream -->
+      <div class="space-y-6">
+        <div class="glass-panel p-6 border-l-4 border-l-rose-500">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+            <h2 class="text-sm font-extrabold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+              <span>⚠️</span> Tabella Errori & Log Incidenti
+            </h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-black">
+              {{ incidents().length }} Eventi
+            </span>
+          </div>
+
+          <div *ngIf="incidents().length === 0" class="text-xs text-slate-400 py-8 text-center bg-slate-950/50 rounded-xl border border-slate-900">
+            <span>🎉 Nessun errore o disservizio registrato. Tutti i monitor sono operativi!</span>
+          </div>
+
+          <div *ngIf="incidents().length > 0" class="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+            <div *ngFor="let incident of incidents()" class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/80 text-xs space-y-2 hover:border-slate-700 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-white text-xs">{{ incident.monitor?.name || 'Monitor #' + incident.monitorId }}</span>
+                <span [ngClass]="{
+                  'bg-rose-500/20 text-rose-300 border-rose-500/40': incident.status === 'OPEN',
+                  'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': incident.status === 'RESOLVED'
+                }" class="px-2 py-0.5 rounded text-[10px] font-extrabold border">
+                  {{ incident.status === 'OPEN' ? '🔴 APERTO (DOWN)' : '🟢 RISOLTO' }}
+                </span>
+              </div>
+
+              <p class="text-rose-300 font-mono text-[11px] bg-rose-950/30 p-2 rounded-lg border border-rose-900/40 break-all">
+                {{ incident.cause || 'Servizio non raggiungibile' }}
+              </p>
+
+              <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-900">
+                <span>Inizio: <strong class="text-slate-300">{{ incident.startedAt | date:'HH:mm:ss dd/MM' }}</strong></span>
+                <span *ngIf="incident.durationSeconds">Durata: <strong class="text-sky-300">{{ incident.durationSeconds }}s</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Dashboard Flexbox Container: WhatsApp Bot & Spacious User Account Table Side-by-Side -->
+    <div class="flex flex-col lg:flex-row items-stretch gap-6 w-full mt-8">
+      
+      <!-- 1. Left Side: WhatsApp Bot Dispatcher Form (Compact Width: w-full lg:w-96 flex-none) -->
+      <div class="w-full lg:w-96 flex-none glass-panel p-6 space-y-4 border-l-4 border-l-emerald-500 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">📱</span>
+              <h3 class="text-sm font-black text-white">Bot Notifiche WhatsApp Unidos</h3>
+            </div>
+            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              Webhook & API Attivi
+            </span>
+          </div>
+
+          <div *ngIf="waSendingStatus()" class="p-3 rounded-xl bg-slate-950 border border-sky-500/40 text-sky-300 text-xs font-bold animate-in fade-in">
+            {{ waSendingStatus() }}
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-sky-200 mb-1">Numero di Telefono *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="waRecipientPhone" 
+                placeholder="+39 320 926 9241" 
+                class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-sky-200 mb-1">Nome Destinatario</label>
+              <input 
+                type="text" 
+                [(ngModel)]="waRecipientName" 
+                placeholder="Guido (Capo)" 
+                class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-sky-200 mb-1">Messaggio WhatsApp *</label>
+              <textarea 
+                [(ngModel)]="waMessageText" 
+                rows="3" 
+                placeholder="Scrivi il messaggio da inviare..." 
+                class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition resize-none"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button (click)="sendWhatsAppFromUi()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2 cursor-pointer mt-4">
+          <span>📱 Invia Messaggio WhatsApp Subito ➔</span>
+        </button>
+      </div>
+
+      <!-- 2. Right Side: Gestione Account Utenti (Flex-1: Takes all remaining width, spacious user table) -->
+      <div class="flex-1 min-w-0 glass-panel p-6 space-y-4 relative z-10 pointer-events-auto">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-lg">
+              👥
+            </div>
+            <div>
+              <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-200">Gestione Account & Utenti Registrati</h2>
+              <p class="text-xs text-slate-400">Pannello di controllo e abilitazione ruoli dev/clienti</p>
+            </div>
+          </div>
+          <span class="px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-black">
+            {{ registeredUsers().length }} Account Registrati
+          </span>
+        </div>
+
+        <div class="overflow-x-auto w-full relative z-20 pointer-events-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 font-semibold uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="p-3">Utente</th>
+                <th class="p-3">Email</th>
+                <th class="p-3">Ruolo</th>
+                <th class="p-3">Stato Abilitazione</th>
+                <th class="p-3">Data Registrazione</th>
+                <th class="p-3 text-right">Azioni Permessi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-medium">
+              <tr *ngFor="let user of registeredUsers()" class="hover:bg-slate-900/50 transition">
+                <td class="p-3 font-bold text-slate-100 flex items-center gap-2">
+                  <span>{{ user.role === 'developer' ? '👨‍💻' : '👤' }}</span>
+                  <span class="font-extrabold text-white">{{ user.name }}</span>
+                </td>
+                <td class="p-3 font-mono text-sky-300">{{ user.email }}</td>
+                <td class="p-3">
+                  <button 
+                    type="button" 
+                    (click)="toggleUserRole(user.id)" 
+                    title="Clicca per cambiare ruolo tra Dev e Cliente"
+                    [ngClass]="{
+                      'bg-sky-500/20 text-sky-300 border-sky-500/40 hover:bg-sky-500/30': user.role === 'developer',
+                      'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700': user.role === 'client'
+                    }" 
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border uppercase transition cursor-pointer relative z-30 inline-flex items-center gap-1 active:scale-95"
+                  >
+                    <span>{{ user.role === 'developer' ? '👨‍💻 Sviluppatore Dev' : '👤 Cliente' }}</span>
+                    <span class="text-[9px] opacity-70">🔄</span>
+                  </button>
+                </td>
+                <td class="p-3">
+                  <span [ngClass]="{
+                    'bg-emerald-500/20 text-emerald-300 border-emerald-500/40': user.status === 'APPROVED',
+                    'bg-amber-500/20 text-amber-300 border-amber-500/40': user.status === 'PENDING',
+                    'bg-rose-500/20 text-rose-300 border-rose-500/40': user.status === 'BLOCKED'
+                  }" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border">
+                    {{ user.status === 'APPROVED' ? '🟢 Approvato' : (user.status === 'PENDING' ? '🟡 In Attesa' : '🔴 Bloccato') }}
+                  </span>
+                </td>
+                <td class="p-3 font-mono text-slate-400">{{ user.registeredAt }}</td>
+                <td class="p-3 text-right space-x-2 relative z-30 pointer-events-auto">
+                  <button 
+                    *ngIf="user.status === 'PENDING'" 
+                    type="button"
+                    (click)="updateUserStatus(user.id, 'APPROVED')" 
+                    class="px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-[10px] font-black border border-emerald-700 transition cursor-pointer relative z-30 shadow-sm active:scale-95"
+                  >
+                    🟢 Approva Dev
+                  </button>
+
+                  <button 
+                    *ngIf="user.status === 'APPROVED'" 
+                    type="button"
+                    (click)="updateUserStatus(user.id, 'BLOCKED')" 
+                    class="px-3 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 text-amber-300 text-[10px] font-black border border-amber-700 transition cursor-pointer relative z-30 shadow-sm active:scale-95"
+                  >
+                    🚫 Blocca
+                  </button>
+
+                  <button 
+                    *ngIf="user.status === 'BLOCKED'" 
+                    type="button"
+                    (click)="updateUserStatus(user.id, 'APPROVED')" 
+                    class="px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-[10px] font-black border border-emerald-700 transition cursor-pointer relative z-30 shadow-sm active:scale-95"
+                  >
+                    🟢 Sblocca
+                  </button>
+
+                  <button 
+                    type="button"
+                    (click)="deleteUser(user.id)" 
+                    class="px-3 py-1.5 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 text-[10px] font-black border border-rose-800 transition cursor-pointer relative z-30 shadow-sm active:scale-95"
+                  >
+                    🗑️ Elimina
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================== -->
+  <!-- 3. PORTALE CLIENTE & SLA STATUS (CLIENT PORTAL VIEW) -->
+  <!-- ================================================== -->
+  <div *ngIf="activeView() === 'client'" class="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-200">
+    
+    <!-- Big Status Banner -->
+    <div class="glass-panel p-8 text-center border-l-8" [ngClass]="{
+      'border-l-emerald-500': stats().down === 0,
+      'border-l-rose-500': stats().down > 0
+    }">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" [ngClass]="{
+        'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30': stats().down === 0,
+        'bg-rose-500/10 text-rose-400 border border-rose-500/30': stats().down > 0
+      }">
+        <span class="text-3xl">{{ stats().down === 0 ? '✓' : '⚠️' }}</span>
+      </div>
+
+      <h2 class="text-2xl md:text-3xl font-black text-slate-100">
+        {{ stats().down === 0 ? 'Tutti i sistemi gestiti per ' + companyProfile().companyName + ' sono operativi' : 'Attenzione: Rilevata un\'anomalia temporanea su 1 o più servizi' }}
+      </h2>
+
+      <p class="text-xs text-slate-400 mt-2">
+        Stato di disponibilità erogato da Unidos S.r.l. - Referente: {{ companyProfile().contactPerson }}
+      </p>
+
+      <div class="mt-6 inline-flex items-center gap-6 px-6 py-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs">
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Disponibilità SLA</span>
+          <strong class="text-lg font-black text-sky-400">{{ stats().uptimePercentage }}%</strong>
+        </div>
+        <div class="w-px h-8 bg-slate-800"></div>
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Tempo Medio Risposta</span>
+          <strong class="text-lg font-black text-purple-400">{{ stats().avgResponseTime }} ms</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client Managed Services Overview -->
+    <div class="glass-panel p-6 space-y-4">
+      <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+        <span>Stato dei Servizi di {{ companyProfile().companyName }}</span>
+        <span class="text-xs text-slate-500 font-normal">Aggiornato in tempo reale</span>
+      </h3>
+
+      <div class="space-y-3">
+        <div *ngFor="let monitor of monitors()" class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full" [ngClass]="{
+              'bg-emerald-500 shadow-md shadow-emerald-500/50': monitor.status === 'UP',
+              'bg-rose-500 shadow-md shadow-rose-500/50': monitor.status === 'DOWN',
+              'bg-amber-500': monitor.status === 'DEGRADED',
+              'bg-slate-500': monitor.status === 'PAUSED'
+            }"></span>
+            <div>
+              <h4 class="font-bold text-slate-100 text-xs">{{ monitor.name }}</h4>
+              <p class="text-[11px] text-slate-500 font-mono">{{ monitor.url || monitor.hostname }}</p>
+            </div>
+          </div>
+
+          <div class="text-right">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase" [ngClass]="{
+              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30': monitor.status === 'UP',
+              'bg-rose-500/10 text-rose-400 border border-rose-500/30': monitor.status === 'DOWN',
+              'bg-amber-500/10 text-amber-400 border border-amber-500/30': monitor.status === 'DEGRADED'
+            }">
+              {{ monitor.status === 'UP' ? 'Operativo' : (monitor.status === 'DOWN' ? 'Disservizio' : 'Degradato') }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Callout -->
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-sky-950/40 to-indigo-950/40 border border-sky-800/30 flex items-center justify-between text-xs">
+      <div>
+        <h4 class="font-bold text-sky-300 text-sm">Contatta il referente: {{ companyProfile().contactPerson }}</h4>
+        <p class="text-slate-400 mt-1">Email: {{ companyProfile().contactEmail }} | Tel: {{ companyProfile().contactPhone }}</p>
+      </div>
+      <button class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold transition">
+        Invia Messaggio
+      </button>
+    </div>
+
+  </div>
+
+  <!-- COMPANY PROFILE SETUP MODAL DIALOG -->
+  <div *ngIf="showCompanyModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 w-full max-w-lg border border-slate-700 shadow-2xl relative animate-in fade-in duration-200">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <span>🏢 Anagrafica Azienda (Configurazione Iniziale)</span>
+        </h2>
+        <button (click)="closeCompanyModal()" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Ragione Sociale / Nome Azienda *</label>
+          <input type="text" [(ngModel)]="companyForm.companyName" placeholder="Es. Unidos S.r.l." class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Partita IVA / Codice Fiscale</label>
+            <input type="text" [(ngModel)]="companyForm.vatNumber" placeholder="IT01234567890" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500 font-mono" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Nome Referente</label>
+            <input type="text" [(ngModel)]="companyForm.contactPerson" placeholder="Es. Marco Rossi" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Email di Notifica Principale</label>
+            <input type="email" [(ngModel)]="companyForm.contactEmail" placeholder="info@unidos.it" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500 font-mono" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Telefono di Contatto</label>
+            <input type="text" [(ngModel)]="companyForm.contactPhone" placeholder="+39 02 1234567" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500 font-mono" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Note Operative / Descrizione Sede</label>
+          <textarea [(ngModel)]="companyForm.notes" rows="3" placeholder="Sede principale, note per i report SLA o indicazioni per il personale tecnico..." class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 mt-8">
+        <button (click)="closeCompanyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">Annulla</button>
+        <button (click)="saveCompanyProfile()" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-lg shadow-sky-500/20">Salva Dati Azienda</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Monitor Modal Dialog -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 w-full max-w-lg border border-slate-700 shadow-2xl relative animate-in fade-in duration-200">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold text-slate-100">
+          {{ selectedMonitor ? 'Modifica Monitor' : 'Nuovo Monitor di Monitoraggio' }}
+        </h2>
+        <button (click)="closeModal()" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome Servizio *</label>
+          <input type="text" [(ngModel)]="monitorForm.name" placeholder="Es. Sito Principale Unidos" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tipologia *</label>
+            <select [(ngModel)]="monitorForm.type" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+              <option value="http">HTTP</option>
+              <option value="https">HTTPS</option>
+              <option value="tcp">TCP Porta</option>
+              <option value="ping">PING</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Intervallo (Minuti)</label>
+            <select [(ngModel)]="monitorForm.interval" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+              <option [ngValue]="1">1 Minuto</option>
+              <option [ngValue]="2">2 Minuti</option>
+              <option [ngValue]="5">5 Minuti</option>
+              <option [ngValue]="10">10 Minuti</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="monitorForm.type === 'http' || monitorForm.type === 'https'">
+          <label class="block text-xs font-semibold text-slate-300 mb-1">URL Completo *</label>
+          <input type="text" [(ngModel)]="monitorForm.url" placeholder="https://www.unidos.it" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+        </div>
+
+        <div *ngIf="monitorForm.type === 'tcp' || monitorForm.type === 'ping'" class="grid grid-cols-3 gap-4">
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Hostname / IP *</label>
+            <input type="text" [(ngModel)]="monitorForm.hostname" placeholder="192.168.1.100 o server.domain.com" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Porta TCP</label>
+            <input type="number" [(ngModel)]="monitorForm.port" placeholder="80" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Timeout (Secondi)</label>
+            <input type="number" [(ngModel)]="monitorForm.timeout" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Codice HTTP Atteso</label>
+            <input type="number" [(ngModel)]="monitorForm.expectedCode" placeholder="200" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Stringa contenuta nella pagina (Opzionale)</label>
+          <input type="text" [(ngModel)]="monitorForm.expectedString" placeholder="Es. OK o Success" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-sky-500" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 mt-8">
+        <button (click)="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">Annulla</button>
+        <button (click)="saveMonitor()" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-lg shadow-sky-500/20">Salva Monitor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div *ngIf="showDetailModal && selectedMonitor" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 w-full max-w-2xl border border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100">{{ selectedMonitor.name }}</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">{{ selectedMonitor.url || selectedMonitor.hostname }}</p>
+        </div>
+        <button (click)="closeDetailModal()" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+      </div>
+
+      <!-- Monitor Stats Header -->
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Stato Attuale</span>
+          <div class="font-black text-sm mt-1" [ngClass]="{
+            'text-emerald-400': selectedMonitor.status === 'UP',
+            'text-rose-400': selectedMonitor.status === 'DOWN',
+            'text-amber-400': selectedMonitor.status === 'DEGRADED'
+          }">{{ selectedMonitor.status }}</div>
+        </div>
+
+        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Ultima Latenza</span>
+          <div class="font-black text-sm text-sky-400 mt-1">{{ selectedMonitor.lastResponseTime || 0 }} ms</div>
+        </div>
+
+        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Intervallo</span>
+          <div class="font-black text-sm text-slate-200 mt-1">{{ selectedMonitor.interval }} min</div>
+        </div>
+      </div>
+
+      <!-- History Checks Table -->
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Storico Ultimi Controlli</h3>
+      <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+        <div *ngFor="let check of monitorChecks()" class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-xs flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span [ngClass]="{
+              'text-emerald-400': check.status === 'UP',
+              'text-rose-400': check.status === 'DOWN',
+              'text-amber-400': check.status === 'DEGRADED'
+            }" class="font-bold text-[11px]">{{ check.status }}</span>
+            <span class="text-slate-400 font-mono text-[11px]">{{ check.checkedAt | date:'HH:mm:ss dd/MM' }}</span>
+          </div>
+
+          <div class="flex items-center gap-4 text-slate-300 font-mono">
+            <span *ngIf="check.statusCode">HTTP {{ check.statusCode }}</span>
+            <span class="text-sky-400">{{ check.responseTime }} ms</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button (click)="closeDetailModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal Dialog -->
+  <div *ngIf="showLoginModal() || isLoginOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+
+
+
+    <div class="glass-panel p-6 md:p-8 max-w-md w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        ✕
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl mx-auto shadow-lg shadow-sky-500/20">
+          U
+        </div>
+        <h2 class="text-xl font-black text-slate-100 tracking-tight">Accedi a Unidos</h2>
+        <p class="text-xs text-slate-400">Inserisci le tue credenziali d'accesso aziendali</p>
+      </div>
+
+      <!-- Form Credenziali Email e Password -->
+      <form (ngSubmit)="loginWithCredentials()" class="space-y-4 pt-2 text-left">
+        <div *ngIf="loginErrorMessage()" class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold">
+          {{ loginErrorMessage() }}
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+          <input 
+            type="email" 
+            [(ngModel)]="loginEmail" 
+            name="loginEmail"
+            placeholder="nome@unidos.it" 
+            class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" 
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+          <input 
+            type="password" 
+            [(ngModel)]="loginPassword" 
+            name="loginPassword"
+            placeholder="••••••••" 
+            class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" 
+          />
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-500/25 transition active:scale-98 cursor-pointer">
+          Accedi
+        </button>
+
+        <div class="pt-1 text-center">
+          <button type="button" (click)="openRegisterModal()" class="text-xs text-sky-400 hover:text-sky-300 font-semibold underline underline-offset-4 transition cursor-pointer">
+            Non hai un account? Crea nuovo account
+          </button>
+        </div>
+      </form>
+
+
+
+
+      <!-- Social Login Provider Options -->
+      <div class="pt-4 border-t border-slate-800/80 space-y-3">
+        <div class="text-center">
+          <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Oppure accedi tramite Social</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Google Login -->
+          <button type="button" (click)="loginWithSocial('google')" class="group p-[1.5px] rounded-xl bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 active:scale-98 cursor-pointer">
+            <div class="w-full h-full bg-slate-950 group-hover:bg-slate-900 px-3 py-2.5 rounded-[10.5px] flex items-center justify-center gap-2.5 text-xs font-bold text-white transition pointer-events-none">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15c0 2.7.7 5.3 1.9 7.7l3.7-2.9c-.2-.7-.4-1.4-.4-2.3z"/>
+                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
+              </svg>
+              <span>Google</span>
+            </div>
+          </button>
+
+          <!-- Facebook Login -->
+          <button type="button" (click)="loginWithSocial('facebook')" class="group p-[1.5px] rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-600 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 active:scale-98 cursor-pointer">
+            <div class="w-full h-full bg-slate-950 group-hover:bg-slate-900 px-3 py-2.5 rounded-[10.5px] flex items-center justify-center gap-2.5 text-xs font-bold text-white transition pointer-events-none">
+              <svg class="w-4 h-4 flex-shrink-0 fill-[#1877F2]" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              <span>Facebook</span>
+            </div>
+          </button>
+
+          <!-- X / Twitter Login -->
+          <button type="button" (click)="loginWithSocial('twitter')" class="group p-[1.5px] rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-400 hover:shadow-lg hover:shadow-sky-400/25 transition-all duration-300 active:scale-98 cursor-pointer">
+            <div class="w-full h-full bg-slate-950 group-hover:bg-slate-900 px-3 py-2.5 rounded-[10.5px] flex items-center justify-center gap-2.5 text-xs font-bold text-white transition pointer-events-none">
+              <svg class="w-4 h-4 flex-shrink-0 fill-white" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span>X / Twitter</span>
+            </div>
+          </button>
+
+          <!-- GitHub Login -->
+          <button type="button" (click)="loginWithSocial('github')" class="group p-[1.5px] rounded-xl bg-gradient-to-r from-purple-500 via-indigo-500 to-sky-500 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 active:scale-98 cursor-pointer">
+            <div class="w-full h-full bg-slate-950 group-hover:bg-slate-900 px-3 py-2.5 rounded-[10.5px] flex items-center justify-center gap-2.5 text-xs font-bold text-white transition pointer-events-none">
+              <svg class="w-4 h-4 flex-shrink-0 fill-white" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+              </svg>
+              <span>GitHub</span>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Live Developers Online Sessions Modal Dialog -->
+  <div *ngIf="showDevSessionsModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div class="glass-panel p-6 md:p-8 max-w-lg w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="toggleDevSessionsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        ✕
+      </button>
+
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-lg">
+            ⚡
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-slate-100 tracking-tight flex items-center gap-2">
+              <span>Sviluppatori & Admin Online</span>
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </h2>
+            <p class="text-xs text-slate-400">Sessioni sviluppatore e tecnici attivi in tempo reale</p>
+          </div>
+        </div>
+
+        <span class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-black text-xs">
+          {{ onlineDevCount() }} Attivi
+        </span>
+      </div>
+
+      <!-- Active Sessions List -->
+      <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
+        <div *ngFor="let session of activeDevSessions()" class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">{{ session.avatar }}</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-100">{{ session.name }}</span>
+                <span [ngClass]="{
+                  'bg-emerald-500/20 text-emerald-400 border-emerald-500/30': session.status === 'ONLINE',
+                  'bg-amber-500/20 text-amber-400 border-amber-500/30': session.status === 'BUSY',
+                  'bg-slate-500/20 text-slate-400 border-slate-500/30': session.status === 'IDLE'
+                }" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full border">
+                  {{ session.status }}
+                </span>
+              </div>
+              <div class="text-[11px] text-slate-400 font-medium">{{ session.role }}</div>
+              <div class="text-[10px] text-slate-500 font-mono mt-0.5">IP: {{ session.ip }} • {{ session.location }}</div>
+            </div>
+          </div>
+
+          <div class="text-right flex flex-col items-end">
+            <span class="text-xs font-bold text-sky-400 font-mono">{{ session.ping }} ms</span>
+            <span class="text-[10px] text-slate-500 font-medium">Dalle {{ session.connectedSince }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>WebSockets & Signal Store: Sincronizzato</span>
+        </span>
+        <button (click)="toggleDevSessionsModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+          Chiudi
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Registration Modal Dialog -->
+  <div *ngIf="showRegisterModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+
+
+    <div class="glass-panel p-6 md:p-8 max-w-md w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeRegisterModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        ✕
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 via-blue-500 to-sky-400 flex items-center justify-center text-white font-black text-xl mx-auto shadow-lg shadow-purple-500/20">
+          U
+        </div>
+        <h2 class="text-xl font-black text-slate-100 tracking-tight">Crea Nuovo Account Unidos</h2>
+        <p class="text-xs text-slate-400">Registrati per accedere alla piattaforma di monitoraggio</p>
+      </div>
+
+      <div class="space-y-4 pt-2 text-left">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome e Cognome *</label>
+          <input type="text" [(ngModel)]="registerForm.name" placeholder="Es. Marco Rossi" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Email *</label>
+          <input type="email" [(ngModel)]="registerForm.email" placeholder="nome@unidos.it" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password *</label>
+          <input type="password" [(ngModel)]="registerForm.password" placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo di Profilo</label>
+          <select [(ngModel)]="registerForm.role" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-purple-500 transition">
+            <option value="client">🏢 Account Cliente Aziendale</option>
+            <option value="developer">👨‍💻 Sviluppatore / Tecnico DevOps (Richiede Approvazione)</option>
+          </select>
+        </div>
+
+        <button (click)="registerUser()" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-500/25 transition">
+          Completa Registrazione ➔
+        </button>
+
+        <div class="pt-1 text-center">
+          <button (click)="closeRegisterModal(); openLoginModal()" class="text-xs text-slate-400 hover:text-slate-200 font-semibold underline underline-offset-4 transition">
+            Hai già un account? Accedi qui
+          </button>
+        </div>
+      </div>
+    </div>
+  <!-- Shop Modal Dialog -->
+  <div *ngIf="showShopModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div class="glass-panel p-6 md:p-8 max-w-2xl w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeShopModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-2xl shadow-lg">🛒</div>
+        <div>
+          <h2 class="text-xl font-black text-white">Unidos Shop & Catalogo Servizi IT</h2>
+          <p class="text-xs text-slate-400">Pacchetti hardware, licenze cloud e soluzioni di supporto tecnico</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition space-y-2">
+          <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Hardware Server</span>
+          <h3 class="text-sm font-extrabold text-white">Unidos Node Server Pro</h3>
+          <p class="text-xs text-slate-400">Infrastruttura edge in rack 1U con monitoraggio integrato H24.</p>
+          <button (click)="closeShopModal(); setView('login')" class="w-full mt-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">Richiedi Preventivo ➔</button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-purple-500/50 transition space-y-2">
+          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Licenze & Cloud</span>
+          <h3 class="text-sm font-extrabold text-white">Unidos Cloud Suite Enterprise</h3>
+          <p class="text-xs text-slate-400">Backup remoto cifrato, gestione identità e monitoraggio proattivo.</p>
+          <button (click)="closeShopModal(); setView('login')" class="w-full mt-2 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs">Acquista Licenza ➔</button>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button (click)="closeShopModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Soluzioni Modal Dialog -->
+  <div *ngIf="showSolutionsModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div class="glass-panel p-6 md:p-8 max-w-xl w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeSolutionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-sky-400 flex items-center justify-center text-2xl shadow-lg">⚙️</div>
+        <div>
+          <h2 class="text-xl font-black text-white">Soluzioni Informatiche Unidos</h2>
+          <p class="text-xs text-slate-400">Dettaglio della soluzione selezionata</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div *ngIf="selectedSolution() === 'consulenza'" class="p-4 rounded-2xl bg-slate-900 border border-sky-500/40 space-y-2">
+          <h3 class="text-base font-black text-sky-400">🌐 Consulenza IT & Cloud Architect</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Progettiamo e ottimizziamo infrastrutture Cloud ibride, migrazioni sicure, containerizzazione Docker/Kubernetes ed audit di efficienza dei costi IT.</p>
+        </div>
+
+        <div *ngIf="selectedSolution() === 'monitoraggio'" class="p-4 rounded-2xl bg-slate-900 border border-emerald-500/40 space-y-2">
+          <h3 class="text-base font-black text-emerald-400">⚡ Monitoraggio Server H24 Real-Time</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Controllo automatico di nodi server, servizi HTTP, API REST, database SQL/PostgreSQL e rilevamento tempestivo di disservizi con allarmi istantanei.</p>
+          <button (click)="closeSolutionModal(); setView(isLoggedIn() ? (userRole() === 'developer' ? 'developer' : 'client') : 'login')" class="mt-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">
+            Accedi al Monitoraggio ➔
+          </button>
+        </div>
+
+        <div *ngIf="selectedSolution() === 'sicurezza'" class="p-4 rounded-2xl bg-slate-900 border border-rose-500/40 space-y-2">
+          <h3 class="text-base font-black text-rose-400">🔒 Sicurezza & Cybersecurity Shield</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Penetration testing, analisi delle vulnerabilità di rete, hardening dei server, protezione DDoS e conformità GDPR per i tuoi dati aziendali.</p>
+        </div>
+
+        <div *ngIf="selectedSolution() === 'sviluppo'" class="p-4 rounded-2xl bg-slate-900 border border-purple-500/40 space-y-2">
+          <h3 class="text-base font-black text-purple-400">🖥️ Sviluppo Software & Web App Su Misura</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Sviluppo di portali gestionali, web application Angular/NestJS moderne, API RESTful ed integrazioni custom per processi aziendali digitali.</p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button (click)="closeSolutionModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contatto Modal Dialog -->
+  <div *ngIf="showContactModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div class="glass-panel p-6 md:p-8 max-w-lg w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeContactModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-600 flex items-center justify-center text-2xl shadow-lg">📞</div>
+        <div>
+          <h2 class="text-xl font-black text-white">Contatta Unidos S.r.l.</h2>
+          <p class="text-xs text-slate-400">Siamo a tua disposizione per supporto e consulenza</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+          <span class="text-lg">🏢</span>
+          <div>
+            <div class="font-bold text-white">Ragione Sociale</div>
+            <div class="text-slate-400">{{ companyProfile().companyName }}</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+          <span class="text-lg">📧</span>
+          <div>
+            <div class="font-bold text-white">Email di Contatto</div>
+            <div class="text-sky-400 font-mono">{{ companyProfile().contactEmail }}</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+          <span class="text-lg">📱</span>
+          <div>
+            <div class="font-bold text-white">Telefono Supporto</div>
+            <div class="text-slate-400 font-mono">{{ companyProfile().contactPhone }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button (click)="closeContactModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Modal Dialog -->
+  <div *ngIf="showBlogModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div class="glass-panel p-6 md:p-8 max-w-2xl w-full border border-slate-700 shadow-2xl relative space-y-6">
+      <button (click)="closeBlogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg">📰</div>
+        <div>
+          <h2 class="text-xl font-black text-white">Unidos Tech Blog & News</h2>
+          <p class="text-xs text-slate-400">Articoli tecnici, aggiornamenti sull'infrastruttura e novità IT</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+            <span>24 Luglio 2026 • Cloud Infrastructure</span>
+            <span class="text-sky-400">In Evidenza</span>
+          </div>
+          <h3 class="text-sm font-extrabold text-white">Come ottimizzare il monitoraggio dei microservizi in tempo reale</h3>
+          <p class="text-xs text-slate-400">Analisi dettagliata sull'utilizzo dei probe periodici, metriche di latenza e notifiche tempestive per prevenire i disservizi.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+            <span>18 Luglio 2026 • Cybersecurity</span>
+            <span>Security</span>
+          </div>
+          <h3 class="text-sm font-extrabold text-white">Linee guida Unidos per la sicurezza dei database PostgreSQL aziendali</h3>
+          <p class="text-xs text-slate-400">Standard di crittografia dei dati in transito ed a riposo per proteggere le informazioni sensibili dei clienti.</p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button (click)="closeBlogModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+

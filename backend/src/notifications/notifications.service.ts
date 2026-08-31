@@ -6,6 +6,11 @@ export class SendWhatsAppDto {
   recipientName?: string;
 }
 
+export class SendTelegramDto {
+  chatId?: string;
+  message: string;
+}
+
 export class SentMessageLog {
   id: string;
   toPhone: string;
@@ -21,6 +26,49 @@ export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
   private sentMessagesLog: SentMessageLog[] = [];
 
+  // Invia una notifica in un Gruppo o Canale Telegram
+  async sendTelegramMessage(payload: SendTelegramDto): Promise<boolean> {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = payload.chatId || process.env.TELEGRAM_CHAT_ID;
+
+    if (!token) {
+      this.logger.error('❌ TELEGRAM_BOT_TOKEN non configurato.');
+      return false;
+    }
+
+    if (!chatId) {
+      this.logger.warn('⚠️ TELEGRAM_CHAT_ID non ancora impostato. Messaggio registrato solo in log.');
+      this.logger.log(`[TELEGRAM NOTIFICATION] ${payload.message}`);
+      return false;
+    }
+
+    try {
+      this.logger.log(`🚀 Invio notifica Telegram al gruppo/canale (${chatId})...`);
+      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: payload.message,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+        }),
+      });
+
+      const data: any = await response.json();
+      if (response.ok && data.ok) {
+        this.logger.log(`✅ Notifica Telegram inviata con successo al gruppo/canale (${chatId})!`);
+        return true;
+      } else {
+        this.logger.error(`❌ Errore API Telegram: ${data.description || JSON.stringify(data)}`);
+        return false;
+      }
+    } catch (err: any) {
+      this.logger.error(`❌ Errore connessione Telegram API: ${err.message}`);
+      return false;
+    }
+  }
+
   // Invia un messaggio WhatsApp tramite API Twilio / Webhook
   async sendWhatsAppMessage(payload: SendWhatsAppDto): Promise<SentMessageLog> {
     const { toPhone, message, recipientName } = payload;
@@ -33,7 +81,7 @@ export class NotificationsService {
     let deliveryStatus: 'DELIVERED' | 'SENT' | 'FAILED' = 'DELIVERED';
 
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const apiKeySid = process.env.TWILIO_API_KEY_SID || 'SK0b4e8175416cd452ab3423a29b34fd90';
+    const apiKeySid = process.env.TWILIO_API_KEY_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN || process.env.TWILIO_API_SECRET;
     const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER || '+14155238886';
 
@@ -102,3 +150,4 @@ export class NotificationsService {
     return this.sentMessagesLog;
   }
 }
+

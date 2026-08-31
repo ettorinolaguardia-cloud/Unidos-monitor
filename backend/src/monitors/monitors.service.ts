@@ -227,7 +227,7 @@ export class MonitorsService implements OnModuleInit {
 
     if (checkStatus === 'DOWN') {
       consecutiveFailures += 1;
-      if (consecutiveFailures >= (monitor.maxRetries || 3)) {
+      if (consecutiveFailures >= (monitor.maxRetries || 1)) {
         newStatus = 'DOWN';
 
         // Apri incidente se non esiste già aperto
@@ -243,13 +243,34 @@ export class MonitorsService implements OnModuleInit {
           });
           await this.incidentsRepository.save(incident);
 
-          // 🚨 Invio automatico notifica WhatsApp al primo disservizio
+          // 🚨 Invio automatico notifica WhatsApp & Telegram al primo disservizio
+          const serverTarget = monitor.url || `${monitor.hostname || 'localhost'}:${monitor.port || 80}`;
+          const serverPort = monitor.port || (monitor.url ? (monitor.url.includes(':') ? monitor.url.split(':').pop()?.split('/')[0] : '80/443') : '80');
+
+          const alertPhone = process.env.WHATSAPP_ALERT_PHONE || '+393209269241';
           const alertMsg = `🚨 *ALLARME UNIDOS MONITORING*\nIl servizio *${monitor.name}* (${monitor.type.toUpperCase()}) è andato in stato *DOWN*!\nCausa: ${errorMessage || 'Connessione Rifiutata / Timeout'}`;
           await this.notificationsService.sendWhatsAppMessage({
-            toPhone: '+393209269241',
+            toPhone: alertPhone,
             recipientName: 'Guido (Capo)',
             message: alertMsg,
           }).catch(err => this.logger.error(`Errore invio avviso WhatsApp: ${err.message}`));
+
+          // Notifica ricca per Gruppo/Canale Telegram con porta, anomalia e suggerimento log
+          const telegramAlert = 
+            `🚨 <b>ANOMALIA RILEVATA SUL SERVER</b> 🚨\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n` +
+            `🖥️ <b>Server:</b> ${monitor.name}\n` +
+            `📍 <b>Target:</b> <code>${serverTarget}</code>\n` +
+            `🔌 <b>Porta interessata:</b> <code>${serverPort}</code>\n` +
+            `⚠️ <b>Tipo Anomalia:</b> SERVER DOWN / ERRORE\n` +
+            `⏱️ <b>Tempo Risposta:</b> ${responseTime} ms\n` +
+            `📝 <b>Dettaglio Errore:</b> ${errorMessage || 'Nessuna risposta dal server'}\n` +
+            `📅 <b>Ora Rilevamento:</b> ${new Date().toLocaleString('it-IT')}\n\n` +
+            `💡 <b>Azione Suggerita:</b> Loggati sul server per verificare i processi ed i servizi in ascolto sulla porta ${serverPort}.`;
+
+          await this.notificationsService.sendTelegramMessage({
+            message: telegramAlert,
+          }).catch(err => this.logger.error(`Errore invio avviso Telegram: ${err.message}`));
         }
       }
     } else {
@@ -269,13 +290,26 @@ export class MonitorsService implements OnModuleInit {
         openIncident.durationSeconds = durationSeconds;
         await this.incidentsRepository.save(openIncident);
 
-        // ✅ Invio automatico notifica WhatsApp di ripristino
+        // ✅ Invio automatico notifica WhatsApp & Telegram di ripristino
+        const resolvePhone = process.env.WHATSAPP_ALERT_PHONE || '+393209269241';
         const resolveMsg = `✅ *UNIDOS MONITORING - SERVIZIO RIPRISTINATO*\nIl servizio *${monitor.name}* è di nuovo *ONLINE* (UP).\nDurata disservizio: ${durationSeconds} secondi.`;
         await this.notificationsService.sendWhatsAppMessage({
-          toPhone: '+393209269241',
+          toPhone: resolvePhone,
           recipientName: 'Guido (Capo)',
           message: resolveMsg,
         }).catch(err => this.logger.error(`Errore invio avviso WhatsApp: ${err.message}`));
+
+        const telegramResolve = 
+          `✅ <b>SERVIZIO RIPRISTINATO - UNIDOS</b> ✅\n` +
+          `━━━━━━━━━━━━━━━━━━━━━\n` +
+          `🖥️ <b>Server:</b> ${monitor.name}\n` +
+          `🟢 <b>Stato Attuale:</b> ONLINE (UP)\n` +
+          `⏱️ <b>Durata Disservizio:</b> ${durationSeconds} secondi\n` +
+          `📅 <b>Ora Ripristino:</b> ${now.toLocaleString('it-IT')}`;
+
+        await this.notificationsService.sendTelegramMessage({
+          message: telegramResolve,
+        }).catch(err => this.logger.error(`Errore invio avviso Telegram: ${err.message}`));
       }
     }
 

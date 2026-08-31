@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Monitor {
   id: number;
@@ -77,8 +78,9 @@ export interface ActiveSession {
 })
 export class MonitorService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/monitors';
-  private sessionsUrl = 'http://localhost:3000/sessions';
+  private baseUrl = environment.apiUrl;
+  private apiUrl = `${this.baseUrl}/monitors`;
+  private sessionsUrl = `${this.baseUrl}/sessions`;
 
   getStats(): Observable<MonitorStats> {
     return this.http.get<MonitorStats>(`${this.apiUrl}/stats`);
@@ -124,7 +126,7 @@ export class MonitorService {
     return this.http.post<ActiveSession>(this.sessionsUrl, session);
   }
 
-  private usersUrl = 'http://localhost:3000/users';
+  private usersUrl = `${this.baseUrl}/users`;
 
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.usersUrl);
@@ -139,7 +141,7 @@ export class MonitorService {
   }
 
   sendWhatsAppMessage(payload: { toPhone: string; recipientName?: string; message: string }): Observable<any> {
-    return this.http.post<any>('http://localhost:3000/notifications/whatsapp/send', payload);
+    return this.http.post<any>(`${this.baseUrl}/notifications/whatsapp/send`, payload);
   }
 
   logoutSession(id: string): Observable<void> {

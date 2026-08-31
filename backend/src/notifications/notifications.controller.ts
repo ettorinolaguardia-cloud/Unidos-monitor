@@ -1,12 +1,28 @@
 import { Controller, Get, Post, Body, Query, Res, HttpStatus } from '@nestjs/common';
-import { NotificationsService, SendWhatsAppDto } from './notifications.service';
+import { NotificationsService, SendWhatsAppDto, SendTelegramDto } from './notifications.service';
 import type { Response } from 'express';
 
 @Controller()
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  // 1. Endpoint per inviare un messaggio WhatsApp
+  // 1. Endpoint per inviare un messaggio Telegram al Gruppo/Canale
+  @Post('notifications/telegram/send')
+  async sendTelegram(@Body() body: SendTelegramDto) {
+    if (!body.message) {
+      return {
+        status: 'error',
+        message: 'Il campo message è obbligatorio.',
+      };
+    }
+    const success = await this.notificationsService.sendTelegramMessage(body);
+    return {
+      status: success ? 'success' : 'error',
+      message: success ? 'Notifica Telegram inviata al gruppo!' : 'Impossibile inviare la notifica Telegram. Verifica TELEGRAM_CHAT_ID.',
+    };
+  }
+
+  // 2. Endpoint per inviare un messaggio WhatsApp
   @Post('notifications/whatsapp/send')
   async sendWhatsApp(@Body() body: SendWhatsAppDto) {
     if (!body.toPhone || !body.message) {

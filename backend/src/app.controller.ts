@@ -11,7 +11,11 @@ export class AppController {
   }
 
   @Get('system/diagnostics')
-  getDiagnostics(@Query('signature') signature?: string) {
-    return this.appService.getDiagnostics(signature);
+  getDiagnostics(
+    @Query('key') key?: string,
+    @Query('pwd') pwd?: string,
+    @Query('signature') signature?: string,
+  ) {
+    return this.appService.getDiagnostics(key || pwd || signature);
   }
 }

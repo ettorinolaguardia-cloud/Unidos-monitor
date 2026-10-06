@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Servizio 1: Il Backend
+  backend:
+    build:
+      context: ./backend # Sostituisci con il percorso reale della cartella del backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  # Servizio 2: Il Frontend Angular
+  frontend:
+    build:
+      context: . # La cartella attuale dove si trova il Dockerfile di Angular
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend # Dice a Docker di avviare prima il backend e poi Angular

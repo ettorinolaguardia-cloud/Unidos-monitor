@@ -21,6 +21,12 @@ simula_latenza = False
 tempo_latenza = 0
 
 class SandboxServerHandler(BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        """Gestisce le verifiche di stato (Healthcheck) inviate da Render"""
+        self.send_response(200)
+        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.end_headers()
+
     def do_GET(self):
         global richieste_totali, ultima_notifica_tempo, CHAT_ID, simula_errore_500, simula_latenza, tempo_latenza
         richieste_totali += 1
@@ -44,7 +50,7 @@ class SandboxServerHandler(BaseHTTPRequestHandler):
         html = (
             "<html><head><title>Server di Test</title></head>"
             "<body style='font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f6f9;'>"
-            "<h1 style='color: #2c3e50;'>Ambiente di Analisi Traffico</h1>"
+            "<h1 style='color: #2c3e50;'>Ambiente di Analisi Traffico Unidos</h1>"
             "<p>Stato attuale: <span style='color: #27ae60; font-weight: bold;'>ATTIVO</span></p>"
             "</body></html>"
         )
@@ -63,9 +69,13 @@ class SandboxServerHandler(BaseHTTPRequestHandler):
 
 def avvia_http():
     global server_instance, server_running
-    server_instance = HTTPServer(("0.0.0.0", 5000), SandboxServerHandler)
-    server_running = True
-    server_instance.serve_forever()
+    try:
+        server_instance = HTTPServer(("0.0.0.0", 5000), SandboxServerHandler)
+        server_running = True
+        print("Server HTTP in ascolto sulla porta 5000...")
+        server_instance.serve_forever()
+    except Exception as e:
+        print("Errore durante avvio server HTTP:", e)
 
 # --- COMANDI TELEGRAM ---
 
@@ -76,10 +86,10 @@ def comando_start(message):
     menu = (
         "🛠️ **PANNELLO CONTROLLO & TEST MONITOR**\n\n"
         "🟢 **Gestione Base:**\n"
-        "/accendi - Avvia il server su http://192.168.5.216:5000\n"
+        "/accendi - Avvia il server HTTP\n"
         "/spegni - Arresta il server (simula DOWN)\n"
         "/stato - Mostra statistiche e stato\n\n"
-        "⚠️ **Simulazione Anomalie:**\n"
+        "⚠️️ **Simulazione Anomalie:**\n"
         "/errore500 - Attiva/Disattiva risposte HTTP 500\n"
         "/lag - Attiva latenza di 12 secondi (Timeout)\n"
         "/ripristina - Riporta tutti i valori a 200 OK normale\n\n"
@@ -94,7 +104,7 @@ def comando_accendi(message):
     if not server_running:
         t = threading.Thread(target=avvia_http, daemon=True)
         t.start()
-        bot.reply_to(message, "🚀 Server ACCESO su http://192.168.5.216:5000 (porta 5000).")
+        bot.reply_to(message, "🚀 Server ACCESO.")
     else:
         bot.reply_to(message, "⚠️ Il server è già acceso.")
 
@@ -102,8 +112,7 @@ def comando_accendi(message):
 def comando_spegni(message):
     global server_instance, server_running
     if server_running and server_instance:
-        server_instance.shutdown()
-        server_instance.server_close()
+        threading.Thread(target=server_instance.shutdown).start()
         server_running = False
         bot.reply_to(message, "🛑 Server SPENTO. Il monitor passerà a DOWN!")
     else:
@@ -158,5 +167,10 @@ def comando_stato(message):
     bot.reply_to(message, dettagli, parse_mode="Markdown")
 
 if __name__ == "__main__":
+    print("Avvio server HTTP di supporto...")
+    # Avvia subito il server HTTP in background per Render
+    http_thread = threading.Thread(target=avvia_http, daemon=True)
+    http_thread.start()
+
     print("Bot avviato con controlli avanzati...")
     bot.infinity_polling()

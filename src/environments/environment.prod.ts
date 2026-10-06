@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://backend:3000',
+  apiUrl: 'https://unidos-monitor-1.onrender.com',
   buildTag: 'eyJhdXRob3IiOiJFdHRvcmlubyBMYSBHdWFyZGlhIiwicHJvamVjdCI6IlVuaWRvcyAyMDI2In0='
 };
